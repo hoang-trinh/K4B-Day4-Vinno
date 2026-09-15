@@ -63,11 +63,20 @@ total_cases`, và tool result error đã được review thủ công.
 
 ## B3. Team eval cases
 
-Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
+Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn. Run file: `runs/v3_B_group_openrouter_20260915T232904392235.json` (10/10 PASS - 100%).
 
 | Case ID | What it tests | Expected behavior | Result |
 |---|---|---|---|
-|  |  |  |  |
+| G01_printing_status_staging | Trích xuất service=printing, giữ environment=staging | check_service_status(service='printing', environment='staging') | PASS |
+| G02_inspect_desktop_security | Kiểm tra bảo mật máy để bàn DT-031 | inspect_device(asset_id='DT-031', check='security') | PASS |
+| G03_wifi_kb_search | Hướng dẫn cấu hình wifi Windows 11 | search_kb(category='wifi') | PASS |
+| G04_missing_asset_disk_error | Thiếu asset_id khi báo hỏng ổ cứng | clarify(response_type='text') | PASS |
+| G05_out_of_scope_cooking | Yêu cầu ngoài phạm vi IT (nấu bún bò) | Refuse without calling tools | PASS |
+| G06_multiturn_clarify_asset_network | Multi-turn: lấy mã máy DT-087 và check=network | inspect_device(asset_id='DT-087', check='network') | PASS |
+| G07_multiturn_correct_service | Multi-turn: đính chính dịch vụ sang Printing | check_service_status(service='printing', environment='production') | PASS |
+| G08_multiturn_confirm_ticket | Multi-turn: xác nhận trước khi tạo ticket | clarify(response_type='yes_no') | PASS |
+| G09_multiturn_cancel_ticket | Multi-turn: hủy yêu cầu tạo ticket | Answer without tool | PASS |
+| G0A_multiturn_parallel_user_asset | Multi-turn: tra cứu nhân viên và máy song song | lookup_user(EMP-1007) & inspect_device(DT-087, check='security') | PASS |
 
 ## B4. Live chat evidence
 
