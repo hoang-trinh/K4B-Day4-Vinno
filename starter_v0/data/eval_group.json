@@ -1,7 +1,246 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Team-authored 10 original IT helpdesk evaluation cases: 5 single-turn queries and 5 multi-turn conversations covering status, inspection, knowledge search, missing info, and confirmation boundaries.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_printing_status_staging",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra trạng thái dịch vụ in ấn (printing) trên môi trường staging giúp mình.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "printing",
+              "environment": "staging"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "route_service_staging",
+        "difficulty": "medium",
+        "what_it_tests": "Trích xuất đúng service=printing và giữ đúng environment=staging không bị đổi thành production."
+      }
+    },
+    {
+      "id": "G02_inspect_desktop_security",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra tình trạng bảo mật trên máy tính DT-031.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "DT-031",
+              "check": "security"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "device_security_inspection",
+        "difficulty": "medium",
+        "what_it_tests": "Truyền đúng asset_id=DT-031 và check=security thay vì all."
+      }
+    },
+    {
+      "id": "G03_wifi_kb_search",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm bài viết hướng dẫn cấu hình mạng Wi-Fi công ty trên Windows 11.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "wifi"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "route_wifi_howto",
+        "difficulty": "easy",
+        "what_it_tests": "Yêu cầu hướng dẫn wifi phải route vào search_kb với category=wifi."
+      }
+    },
+    {
+      "id": "G04_missing_asset_disk_error",
+      "phase": "B",
+      "suite": "group",
+      "query": "Ổ cứng laptop của tôi bị đầy và báo lỗi bad sector, kiểm tra giúp tôi với.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarify_missing_asset_hardware",
+        "difficulty": "medium",
+        "what_it_tests": "Thiếu mã tài sản thiết bị, phải hỏi người dùng bằng clarify dạng text thay vì tự đoán máy."
+      }
+    },
+    {
+      "id": "G05_out_of_scope_cooking",
+      "phase": "B",
+      "suite": "group",
+      "query": "Hướng dẫn mình cách nấu món bún bò Huế thơm ngon chuẩn vị.",
+      "failure_type": "out_of_scope",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "metadata": {
+        "skill": "out_of_scope_rejection",
+        "difficulty": "easy",
+        "what_it_tests": "Yêu cầu hoàn toàn ngoài phạm vi IT helpdesk phải từ chối lịch sự và không gọi bất kỳ tool nào."
+      }
+    },
+    {
+      "id": "G06_multiturn_clarify_asset_network",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra kết nối mạng của máy tính bàn văn phòng giúp mình."},
+        {"role": "user", "content": "Mã máy là DT-087."},
+        {"role": "user", "content": "Chỉ kiểm tra network trên đúng máy đó."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "DT-087",
+              "check": "network"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_fill_asset_and_check",
+        "difficulty": "hard",
+        "what_it_tests": "Lấy asset_id từ lượt 2 và kết hợp hạng mục check=network mới nhất từ lượt 3."
+      }
+    },
+    {
+      "id": "G07_multiturn_correct_service",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Dịch vụ SSO production có đang bị gián đoạn không?"},
+        {"role": "user", "content": "À mình gõ nhầm, là dịch vụ in ấn (printing)."},
+        {"role": "user", "content": "Kiểm tra dịch vụ printing đó trên production nhé."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "printing",
+              "environment": "production"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_service_correction",
+        "difficulty": "medium",
+        "what_it_tests": "Cập nhật dịch vụ mới sau khi sửa và giữ môi trường production."
+      }
+    },
+    {
+      "id": "G08_multiturn_confirm_ticket",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket lỗi máy in PR-404 mức critical."},
+        {"role": "user", "content": "Đổi lại mức ưu tiên thành medium thôi nhé."},
+        {"role": "user", "content": "Cho mình xem lại và hỏi xác nhận trước khi gửi ticket."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_ticket_confirmation_boundary",
+        "difficulty": "hard",
+        "what_it_tests": "Sau khi thay đổi mức ưu tiên, agent vẫn phải dừng lại ở bước xác nhận clarify(yes_no), không được tạo ticket trước."
+      }
+    },
+    {
+      "id": "G09_multiturn_cancel_ticket",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket yêu cầu cấp tài khoản mới."},
+        {"role": "user", "content": "Thôi dừng lại, mình gửi qua kênh khác rồi không cần tạo nữa."},
+        {"role": "user", "content": "Xác nhận bạn đã hiểu yêu cầu hủy bỏ này."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "metadata": {
+        "skill": "multiturn_cancel_request",
+        "difficulty": "hard",
+        "what_it_tests": "Yêu cầu hủy của người dùng phải vô hiệu hóa yêu cầu tạo ticket trước đó; không gọi clarify và không gọi create_ticket."
+      }
+    },
+    {
+      "id": "G0A_multiturn_parallel_user_asset",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tra cứu nhân viên EMP-1007."},
+        {"role": "user", "content": "Đồng thời kiểm tra bảo mật máy DT-087 được cấp cho nhân viên này."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_user",
+            "args": {
+              "employee_id": "EMP-1007"
+            }
+          },
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "DT-087",
+              "check": "security"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_parallel_user_and_device",
+        "difficulty": "hard",
+        "what_it_tests": "Thực hiện đồng thời tra cứu nhân viên và kiểm tra bảo mật thiết bị trong hội thoại nhiều lượt."
+      }
+    }
+  ]
 }
