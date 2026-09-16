@@ -1,10 +1,5 @@
-# starter_v0 — intentionally incomplete first-draft declarations.
-# Students improve routing guidance, argument conventions, missing-information
-# handling, and confirmation boundaries through v1/v2/v3.
-#
+# starter_v0 — first-draft declarations, improved by explicit routing and safety guidance.
 # Keep built-in names and supplied evaluation cases unchanged.
-# Improve descriptions and compatible schemas. Declare team-built bonus tools
-# here and in tools/__init__.py, then test them with team-authored cases.
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
@@ -50,18 +45,17 @@ tools:
     parameters:
       type: object
       properties:
-        employee_id: {type: string, description: "Mã nhân viên"}
+        employee_id: {type: string, description: "Exact employee ID, for example EMP-1003."}
       required: [employee_id]
 
   - name: format_incident_report
-    description: "Trình bày các kết quả đã có thành báo cáo."
+    description: "Format already-known findings into a brief, technical, or handoff report. Only use this when the findings are already available; do not collect new evidence or refetch data in the same step."
     parameters:
       type: object
       properties:
         findings:
           type: array
-          default: []
-          description: "Các kết quả đã thu thập"
+          description: "Findings already gathered by previous checks or user-provided facts."
           items:
             type: object
             properties:
@@ -69,30 +63,30 @@ tools:
               detail: {type: string}
               source: {type: string}
               status: {type: string}
-        template: {type: string, enum: [brief, technical, handoff], default: "brief", description: "Mẫu báo cáo"}
-        incident_title: {type: string, default: "IT incident", description: "Tiêu đề"}
+        template: {type: string, enum: [brief, technical, handoff], description: "The report template to use."}
+        incident_title: {type: string, default: "IT incident", description: "Report title."}
       required: [findings, template]
 
   # ---------------- Optional/advanced tools ----------------
   - name: search_device_info
-    description: "Tìm thông tin công khai về một model thiết bị trên web. Chỉ truyền hãng, model và loại thông tin; không truyền asset ID, employee ID hoặc dữ liệu nội bộ."
+    description: "Search public product info for a device model. Only use public brand/model information; never send internal asset IDs, employee IDs, or sensitive company data."
     parameters:
       type: object
       properties:
-        manufacturer: {type: string, description: "Hãng sản xuất công khai, ví dụ Lenovo"}
-        model: {type: string, description: "Tên model công khai, ví dụ ThinkPad T14 Gen 4"}
-        query_type: {type: string, enum: [specs, drivers, support, compatibility], default: "support", description: "Loại thông tin cần tìm"}
-        max_results: {type: integer, default: 3, description: "Số kết quả, tối đa 5"}
+        manufacturer: {type: string, description: "Public manufacturer name, e.g. Lenovo."}
+        model: {type: string, description: "Public model name, e.g. ThinkPad T14 Gen 4."}
+        query_type: {type: string, enum: [specs, drivers, support, compatibility], default: "support", description: "Type of public information needed."}
+        max_results: {type: integer, default: 3, minimum: 1, maximum: 5, description: "Maximum number of results."}
       required: [manufacturer, model, query_type]
 
   - name: policy
-    description: "Tìm trong chính sách IT nội bộ."
+    description: "Search internal company policy documents for a policy answer. Use this only for policy questions, not operational troubleshooting or diagnostics."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Nội dung cần tìm"}
-        policy_area: {type: string, enum: [all, access_control, data_privacy, external_tools, incident_response, service_operations, ticketing], default: "all", description: "Nhóm chính sách"}
-        top_k: {type: integer, default: 3, description: "Số mục"}
+        query: {type: string, description: "The policy topic to locate."}
+        policy_area: {type: string, enum: [all, access_control, data_privacy, external_tools, incident_response, service_operations, ticketing], default: "all", description: "The relevant policy area."}
+        top_k: {type: integer, default: 3, minimum: 1, maximum: 10, description: "Maximum number of matching policy sections to return."}
       required: [query]
 
   - name: create_ticket
